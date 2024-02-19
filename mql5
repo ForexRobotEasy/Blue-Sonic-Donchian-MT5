@@ -1,0 +1,70 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                             Blue Sonic Donchian MT5|
+//|                                      https://www.forexroboteasy.com|
+//|                                               Forex Robot Easy Team|
+//+------------------------------------------------------------------+
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Indicators\DonchianChannel.mqh>
+
+// Define global variables
+input string symbol = 'EURUSD'; // Symbol to trade
+input ENUM_TIMEFRAMES timeframe = PERIOD_H1; // Timeframe to analyze
+input double lotSize = 0.1; // Lot size for trading
+input double stopLoss = 50; // Stop loss in pips
+input double takeProfit = 100; // Take profit in pips
+
+// Define objects
+CTrade trade;
+CDonchianChannel donchianChannel;
+
+// Initialize the expert advisor
+int OnInit()
+{
+   // Set the symbol and timeframe
+   trade.Symbol(symbol);
+   trade.Timeframe(timeframe);
+
+   // Set stop loss and take profit levels
+   trade.StopLoss(stopLoss);
+   trade.TakeProfit(takeProfit);
+
+   // Initialize the Donchian Channel indicator
+   donchianChannel.Create();
+   donchianChannel.SetSymbol(symbol);
+   donchianChannel.SetTimeframe(timeframe);
+   donchianChannel.SetPeriod(20);
+   donchianChannel.SetShift(0);
+
+   return(INIT_SUCCEEDED);
+}
+
+// Handle tick events
+void OnTick()
+{
+   // Check if price crosses the Donchian Channel indicator
+   if(donchianChannel.CrossesFromAbove())
+   {
+      // Open a buy trade
+      trade.Buy(lotSize);
+   }
+   else if(donchianChannel.CrossesFromBelow())
+   {
+      // Open a sell trade
+      trade.Sell(lotSize);
+   }
+}
+
+// Handle deinitialization
+void OnDeinit(const int reason)
+{
+   // Close any open trades
+   trade.CloseAll();
+
+   // Destroy the Donchian Channel indicator
+   donchianChannel.Destroy();
+}
+
+//+------------------------------------------------------------------+
